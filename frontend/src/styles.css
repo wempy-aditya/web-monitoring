@@ -226,6 +226,7 @@ th {
 
 .chart-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
 }
@@ -235,6 +236,10 @@ th {
   border-radius: 14px;
   padding: 16px;
   background: #ffffff;
+}
+
+.chart-canvas {
+  height: 160px;
 }
 
 .chart-header {
@@ -261,7 +266,18 @@ th {
 
 .chart-card canvas {
   width: 100%;
-  height: 260px;
+  height: 100%;
+  display: block;
+}
+
+@media (min-width: 960px) {
+  .chart-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chart-card:last-child {
+    grid-column: span 2;
+  }
 }
 
 .metric {

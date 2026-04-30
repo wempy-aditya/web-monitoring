@@ -94,7 +94,8 @@ export function getAnalytics({ from, to }) {
   };
 }
 
-export function getSeries({ from, to, urlId }) {
+export function getSeries({ from, to, urlId, bucketMinutes }) {
+  const bucketSeconds = Math.max(1, bucketMinutes) * 60;
   const responseFilters = buildSeriesFilters({
     from,
     to,
@@ -104,7 +105,10 @@ export function getSeries({ from, to, urlId }) {
 
   const responseStmt = db.prepare(`
     SELECT
-      strftime('%Y-%m-%d %H:00:00', checked_at) AS bucket,
+      datetime(
+        (CAST(strftime('%s', checked_at) AS INTEGER) / ?) * ?,
+        'unixepoch'
+      ) AS bucket,
       ROUND(AVG(response_time_ms), 2) AS avg_response_time_ms
     FROM check_results
     ${responseFilters.clause}
@@ -141,7 +145,7 @@ export function getSeries({ from, to, urlId }) {
   `);
 
   return {
-    response_series: responseStmt.all(...responseFilters.params),
+    response_series: responseStmt.all(bucketSeconds, bucketSeconds, ...responseFilters.params),
     uptime_overall: uptimeOverallStmt.all(from, to),
     uptime_by_url: urlId ? uptimeByUrlStmt.all(from, to, urlId) : []
   };

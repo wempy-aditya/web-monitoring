@@ -23,6 +23,7 @@ const elements = {
   overallAvg: document.querySelector("#overall-avg"),
   overallTotal: document.querySelector("#overall-total"),
   chartUrlSelect: document.querySelector("#chart-url"),
+  chartBucketSelect: document.querySelector("#chart-bucket"),
   uptimeUrlSelect: document.querySelector("#uptime-url"),
   responseChartCanvas: document.querySelector("#response-chart"),
   uptimeOverallCanvas: document.querySelector("#uptime-overall-chart"),
@@ -468,6 +469,7 @@ async function loadAnalyticsSeries() {
 
   const responseParams = new URLSearchParams(baseParams);
   responseParams.set("url_id", elements.chartUrlSelect.value);
+  responseParams.set("bucket_minutes", elements.chartBucketSelect.value || "60");
 
   const uptimeParams = new URLSearchParams(baseParams);
   uptimeParams.set("url_id", elements.uptimeUrlSelect.value);
@@ -483,6 +485,15 @@ async function loadAnalyticsSeries() {
           apiRequest(`/analytics/series?${uptimeParams.toString()}`)
         );
 
+  const bucketMinutes = Number.parseInt(
+    elements.chartBucketSelect.value || "60",
+    10
+  );
+  const bucketLabel = Number.isNaN(bucketMinutes)
+    ? "hourly"
+    : bucketMinutes % 60 === 0
+      ? `${bucketMinutes / 60}h`
+      : `${bucketMinutes}m`;
   const responseUrlLabel =
     cachedUrls.find((entry) => String(entry.id) === elements.chartUrlSelect.value)
       ?.url ?? "Response time";
@@ -493,7 +504,7 @@ async function loadAnalyticsSeries() {
   renderCharts({
     responseSeries,
     uptimeSeries,
-    responseLabel: `Response time: ${responseUrlLabel}`,
+    responseLabel: `Response time (${bucketLabel}): ${responseUrlLabel}`,
     uptimeLabel: `Uptime: ${uptimeUrlLabel}`
   });
 }
@@ -628,6 +639,7 @@ elements.refreshResults.addEventListener("click", loadResults);
 
 elements.refreshAnalytics.addEventListener("click", loadAnalytics);
 elements.chartUrlSelect.addEventListener("change", loadAnalyticsSeries);
+elements.chartBucketSelect.addEventListener("change", loadAnalyticsSeries);
 elements.uptimeUrlSelect.addEventListener("change", loadAnalyticsSeries);
 
 elements.applyFilters.addEventListener("click", async () => {

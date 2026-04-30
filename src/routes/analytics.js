@@ -27,6 +27,13 @@ export function registerAnalyticsRoutes(app) {
       return;
     }
 
+    const bucketRaw = request.query?.bucket_minutes;
+    const bucketMinutes = parsePositiveInt(bucketRaw, 60) ?? 60;
+    if (bucketMinutes < 1 || bucketMinutes > 1440) {
+      reply.code(400).send({ error: "Invalid bucket_minutes" });
+      return;
+    }
+
     const parsedFrom = parseDateInput(request.query?.from, "start");
     const parsedTo = parseDateInput(request.query?.to, "end");
     const now = new Date();
@@ -34,10 +41,16 @@ export function registerAnalyticsRoutes(app) {
     const from =
       parsedFrom ?? new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
-    const series = getSeries({ from, to, urlId: urlId ?? null });
+    const series = getSeries({
+      from,
+      to,
+      urlId: urlId ?? null,
+      bucketMinutes
+    });
 
     reply.send({
       range: { from, to },
+      bucket_minutes: bucketMinutes,
       ...series
     });
   });
