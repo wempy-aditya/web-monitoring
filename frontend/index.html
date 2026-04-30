@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Monitoring</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Lightweight uptime tracking</p>
+          <h1>Web Monitoring</h1>
+          <p class="subtitle">Track uptime, status codes, and response time across your URLs.</p>
+        </div>
+        <div class="auth-panel">
+          <button id="set-auth">Set credentials</button>
+          <button id="clear-auth" class="ghost">Clear</button>
+          <p id="auth-status" class="muted">Auth not set</p>
+        </div>
+      </header>
+
+      <main>
+        <section class="card" id="add-url">
+          <h2>Add URL</h2>
+          <form id="url-form">
+            <label>
+              URL
+              <input type="url" name="url" placeholder="https://example.com" required />
+            </label>
+            <label>
+              Interval (seconds)
+              <input type="number" name="interval" min="1" value="60" required />
+            </label>
+            <label class="inline">
+              <input type="checkbox" name="isActive" checked />
+              Active
+            </label>
+            <button type="submit">Add monitor</button>
+          </form>
+          <p id="form-status" class="muted"></p>
+        </section>
+
+        <section class="card">
+          <div class="section-header">
+            <h2>Monitored URLs</h2>
+            <button id="refresh-urls" class="ghost">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table id="urls-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Interval</th>
+                  <th>Active</th>
+                  <th>Status</th>
+                  <th>Last Checked</th>
+                  <th>Avg Response</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-header">
+            <h2>Logs</h2>
+            <button id="refresh-results" class="ghost">Refresh</button>
+          </div>
+          <div class="filters">
+            <label>
+              URL
+              <select id="filter-url"></select>
+            </label>
+            <label>
+              From
+              <input type="date" id="filter-from" />
+            </label>
+            <label>
+              To
+              <input type="date" id="filter-to" />
+            </label>
+            <button id="apply-filters">Apply</button>
+          </div>
+          <div class="table-wrap">
+            <table id="results-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Checked At</th>
+                  <th>Status</th>
+                  <th>Status Code</th>
+                  <th>Response (ms)</th>
+                  <th>Error</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-header">
+            <h2>Analytics</h2>
+            <button id="refresh-analytics" class="ghost">Refresh</button>
+          </div>
+          <div class="analytics-grid">
+            <div class="metric">
+              <p class="label">Overall uptime</p>
+              <p id="overall-uptime" class="value">-</p>
+            </div>
+            <div class="metric">
+              <p class="label">Avg response (ms)</p>
+              <p id="overall-avg" class="value">-</p>
+            </div>
+            <div class="metric">
+              <p class="label">Total checks</p>
+              <p id="overall-total" class="value">-</p>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>Response time (hourly)</h3>
+                <label class="chart-select">
+                  URL
+                  <select id="chart-url"></select>
+                </label>
+              </div>
+              <canvas id="response-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>Uptime per day (overall)</h3>
+              </div>
+              <canvas id="uptime-overall-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3>Uptime per day (per URL)</h3>
+                <label class="chart-select">
+                  URL
+                  <select id="uptime-url"></select>
+                </label>
+              </div>
+              <canvas id="uptime-url-chart"></canvas>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="analytics-table">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Uptime %</th>
+                  <th>Avg Response</th>
+                  <th>Total Checks</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
