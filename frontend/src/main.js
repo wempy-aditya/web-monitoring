@@ -11,6 +11,10 @@ const elements = {
   formStatus: document.querySelector("#form-status"),
   urlsTableBody: document.querySelector("#urls-table tbody"),
   resultsTableBody: document.querySelector("#results-table tbody"),
+  resultsPrev: document.querySelector("#results-prev"),
+  resultsNext: document.querySelector("#results-next"),
+  resultsPage: document.querySelector("#results-page"),
+  resultsPageSize: document.querySelector("#results-page-size"),
   analyticsTableBody: document.querySelector("#analytics-table tbody"),
   filterUrl: document.querySelector("#filter-url"),
   filterFrom: document.querySelector("#filter-from"),
@@ -34,6 +38,8 @@ let cachedUrls = [];
 let responseChart = null;
 let uptimeOverallChart = null;
 let uptimeUrlChart = null;
+let resultsPage = 1;
+let lastResultsCount = 0;
 
 const chartPalette = {
   primary: "#1f6f8b",
@@ -308,6 +314,16 @@ function renderResults(results) {
 
     elements.resultsTableBody.appendChild(row);
   });
+
+  lastResultsCount = results.length;
+  updateResultsPagination();
+}
+
+function updateResultsPagination() {
+  const pageSize = Number.parseInt(elements.resultsPageSize.value, 10) || 50;
+  elements.resultsPage.textContent = `Page ${resultsPage}`;
+  elements.resultsPrev.disabled = resultsPage <= 1;
+  elements.resultsNext.disabled = lastResultsCount < pageSize;
 }
 
 function renderAnalytics(analytics) {
@@ -406,6 +422,8 @@ async function loadUrls() {
 
 async function loadResults() {
   const params = new URLSearchParams();
+  const pageSize = Number.parseInt(elements.resultsPageSize.value, 10) || 50;
+  const offset = (resultsPage - 1) * pageSize;
   if (elements.filterUrl.value) {
     params.set("url_id", elements.filterUrl.value);
   }
@@ -415,6 +433,8 @@ async function loadResults() {
   if (elements.filterTo.value) {
     params.set("to", elements.filterTo.value);
   }
+  params.set("limit", String(pageSize));
+  params.set("offset", String(offset));
 
   const query = params.toString();
   const results = await withAuthRetry(() =>
@@ -646,9 +666,29 @@ elements.applyFilters.addEventListener("click", async () => {
   if (!cachedUrls.length) {
     await loadUrls();
   }
+  resultsPage = 1;
   await loadResults();
   await loadAnalytics();
   await loadAnalyticsSeries();
+});
+
+elements.resultsPrev.addEventListener("click", async () => {
+  if (resultsPage > 1) {
+    resultsPage -= 1;
+    await loadResults();
+  }
+});
+
+elements.resultsNext.addEventListener("click", async () => {
+  if (!elements.resultsNext.disabled) {
+    resultsPage += 1;
+    await loadResults();
+  }
+});
+
+elements.resultsPageSize.addEventListener("change", async () => {
+  resultsPage = 1;
+  await loadResults();
 });
 
 bootstrap();
